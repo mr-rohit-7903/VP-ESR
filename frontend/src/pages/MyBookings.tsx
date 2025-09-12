@@ -1,111 +1,104 @@
-import React, { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useState } from "react";
 
 interface Booking {
   _id: string;
-  name: string;
   title: string;
-  room: string;
   description: string;
+  room: string;
   startTime: string;
   endTime: string;
+  name: string; // make sure this matches your DB field
 }
 
-interface MyBookingsProps {
-  currentUserName: string;
-}
-
-const API_BASE = 'http://localhost:5001/api/bookings';
-
-export const MyBookings: React.FC<MyBookingsProps> = ({ currentUserName }) => {
+const MyBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // 🔹 Change this to the logged-in user's name
+  const userName = "John Doe";
 
   const fetchMyBookings = async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      console.log('📥 Fetching bookings for user:', currentUserName);
-
-      const res = await fetch(API_BASE);
-      console.log('📡 GET status:', res.status);
-
-      if (!res.ok) throw new Error('Failed to fetch bookings');
-
-      const data = await res.json();
-      console.log('📦 Raw bookings from backend:', data);
-
-      const mine = data.filter(
-        (b: Booking) => b.name.toLowerCase() === currentUserName.toLowerCase()
+      const res = await fetch(
+        `http://localhost:5001/api/bookings/my?name=${encodeURIComponent(userName)}`
       );
-
-      console.log('✅ Filtered my bookings:', mine);
-      setBookings(mine);
-    } catch (err) {
-      console.error('💥 Error loading my bookings:', err);
+      if (!res.ok) throw new Error("Failed to fetch bookings");
+      const data = await res.json();
+      console.log("Fetched bookings:", data); // debug log
+      setBookings(data);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const cancelBooking = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
-
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this booking?")) return;
+    setDeletingId(id);
     try {
-      console.log('🗑️ Cancelling booking:', id);
-
-      const res = await fetch(`${API_BASE}/${id}`, {
-        method: 'DELETE'
+      const res = await fetch(`http://localhost:5001/api/bookings?id=${id}`, {
+        method: "DELETE",
       });
-
-      console.log('📡 DELETE status:', res.status);
-
-      if (!res.ok) throw new Error('Failed to cancel booking');
-
+      if (!res.ok) throw new Error("Failed to delete booking");
       setBookings((prev) => prev.filter((b) => b._id !== id));
-      console.log('✅ Booking cancelled:', id);
-    } catch (err) {
-      console.error('💥 Error cancelling booking:', err);
+    } catch (err: any) {
+      alert(err.message || "Delete failed");
+    } finally {
+      setDeletingId(null);
     }
   };
 
   useEffect(() => {
     fetchMyBookings();
-  }, [currentUserName]);
-
-  if (loading) return <div className="p-4">Loading your bookings...</div>;
-
-  if (bookings.length === 0)
-    return <div className="p-4 text-muted-foreground">You have no bookings yet.</div>;
+  }, []);
 
   return (
-    <div className="space-y-4 p-4">
-      <h2 className="text-xl font-semibold">📋 My Bookings</h2>
+    <div className="min-h-screen bg-gray-900 text-white p-8">
+      <h1 className="text-3xl font-bold mb-6">📋 My Bookings</h1>
 
-      <div className="space-y-3">
-        {bookings.map((b) => (
+      {loading && <p>Loading your bookings...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {!loading && !error && bookings.length === 0 && (
+        <p className="text-gray-400">No bookings found.</p>
+      )}
+
+      <div className="grid gap-4 mt-4">
+        {bookings.map((booking) => (
           <div
-            key={b._id}
-            className="border rounded-lg p-4 flex justify-between items-center"
+            key={booking._id}
+            className="bg-gray-800 p-4 rounded-xl shadow-md border border-gray-700 flex flex-col gap-2"
           >
-            <div>
-              <div className="font-medium">{b.room === 'esr' ? 'ESR Room' : 'VP Room'}</div>
-              <div className="text-sm text-muted-foreground">
-                {format(new Date(b.startTime), 'PPPP')} —{' '}
-                {format(new Date(b.startTime), 'HH:mm')} to{' '}
-                {format(new Date(b.endTime), 'HH:mm')}
-              </div>
-              <div className="text-sm">{b.description || 'No description'}</div>
-            </div>
-            <Button
-              variant="destructive"
-              onClick={() => cancelBooking(b._id)}
+            <h2 className="text-xl font-semibold">{booking.title}</h2>
+            <p className="text-gray-300">{booking.description}</p>
+            <p>
+              <span className="font-medium">Room:</span> {booking.room}
+            </p>
+            <p>
+              <span className="font-medium">Start:</span>{" "}
+              {new Date(booking.startTime).toLocaleString()}
+            </p>
+            <p>
+              <span className="font-medium">End:</span>{" "}
+              {new Date(booking.endTime).toLocaleString()}
+            </p>
+            <button
+              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold disabled:opacity-50"
+              onClick={() => handleDelete(booking._id)}
+              disabled={deletingId === booking._id}
             >
-              Cancel
-            </Button>
+              {deletingId === booking._id ? "Deleting..." : "Delete"}
+            </button>
           </div>
         ))}
       </div>
     </div>
   );
 };
+
+export default MyBookings;

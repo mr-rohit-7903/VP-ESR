@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { RefreshCw, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { DatePicker } from './DatePicker';
 import { RoomSelector } from './RoomSelector';
 import { TimelineView } from './TimelineView';
@@ -21,6 +22,8 @@ export interface Booking {
 const API_BASE = 'http://localhost:5001/api/bookings';
 
 const BookingTimeline = () => {
+  const navigate = useNavigate();
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedRoom, setSelectedRoom] = useState('ESR Room');
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -104,7 +107,6 @@ const BookingTimeline = () => {
       const newBooking = await res.json();
       console.log('✅ Booking created successfully:', newBooking);
 
-      // 🟢 Automatically switch to the date/room you just booked
       setSelectedDate(new Date(bookingData.date));
       setSelectedRoom(bookingData.room);
 
@@ -115,17 +117,9 @@ const BookingTimeline = () => {
     }
   };
 
-
   useEffect(() => {
-    console.log('📌 Selected date changed:', selectedDate);
-    console.log('📌 Selected room changed:', selectedRoom);
     fetchBookings();
   }, [selectedDate, selectedRoom]);
-
-  const handleRefresh = () => {
-    console.log('🔁 Manual refresh clicked');
-    fetchBookings();
-  };
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -140,13 +134,11 @@ const BookingTimeline = () => {
           </div>
           <div className="flex gap-3">
             <Button 
-              variant="secondary" 
-              onClick={handleRefresh}
+              variant="secondary"
+              onClick={() => navigate('/my-bookings')}
               className="flex items-center gap-2"
-              disabled={loading}
             >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
+              My Bookings
             </Button>
             <Button 
               onClick={() => setShowBookingForm(true)}
