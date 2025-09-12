@@ -63,3 +63,15 @@ export const createBookingService = async (bookingData) => {
 
   return newBooking;
 };
+
+
+export const delBooking = async(_id)=>{
+  if(!_id){
+    const error = new Error('Id not found for deleting the booking in service');
+    error.statusCode = 409;
+    throw error.message;
+  }
+  const del = await Booking.deleteOne({_id});
+  
+  return del;
+}

@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import {
   createBookingService,
   getBookingsByDateService,
+  delBooking
 } from '../service/booking.service.js';
 
 
@@ -21,3 +22,18 @@ export const getBookingsByDate = asyncHandler(async (req, res) => {
   const bookings = await getBookingsByDateService(date);
   res.status(200).json(bookings);
 });
+
+export const deleteBooking = asyncHandler(async(req,res)=>{
+  const {_id} = req.query;
+  if(!_id){
+    res.status(400);
+    throw new Error('Id is required for Deleting')
+  }
+  const del = await delBooking(_id);
+
+  if(del.deletedCount == 0){
+    res.status(400);
+    throw new Error('No such booking found while deleting')
+  }
+  res.status(200).json(del);
+})
