@@ -99,7 +99,7 @@ The request body must be a JSON object with the following fields:
 | :---- | :---- | :---- | :---- |
 | name | String | Yes | The full name of the person booking the room. |
 | title | String | Yes | The job title or position of the person. |
-| room | String | Yes | The name of the room. Must be exactly "ESP Room" or "VP Room". |
+| room | String | Yes | The name of the room. Must be exactly "ESR Room" or "VP Room". |
 | date | String | Yes | The date of the booking in YYYY-MM-DD format. |
 | startTime | String | Yes | The start time of the booking in 24-hour HH:MM format. |
 | endTime | String | Yes | The end time of the booking in 24-hour HH:MM format. |
@@ -110,7 +110,7 @@ The request body must be a JSON object with the following fields:
 {  
   "name": "Roshil Singh",  
   "title": "Lead Developer",  
-  "room": "ESP Room",   
+  "room": "ESR Room",   
   "date": "2025-09-16",  
   "startTime": "11:00",  
   "endTime": "12:30",  
@@ -148,4 +148,4 @@ If the booking is created successfully, the API will return the complete booking
 ## **3\. Important Notes for Frontend**
 
 * **Date & Time Handling:** The API expects date, startTime, and endTime as separate strings. The backend is responsible for combining them into full UTC Date objects. All dates returned from the API (like startTime and createdAt) will be in UTC format. Your frontend will need to handle the conversion to the user's local timezone for display.  
-* **Room Names:** The room field in the **request body** is case-sensitive and must be one of the two allowed user-friendly values: "ESP Room" or "VP Room". The backend will convert these to "esr" and "vp" before saving. The frontend should use a dropdown or select input to ensure valid data is sent.
+* **Room Names:** The room field in the **request body** is case-sensitive and must be one of the two allowed user-friendly values: "ESR Room" or "VP Room". The backend will convert these to "esr" and "vp" before saving. The frontend should use a dropdown or select input to ensure valid data is sent.

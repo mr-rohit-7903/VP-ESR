@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RefreshCw, Plus } from 'lucide-react';
@@ -11,80 +11,120 @@ export interface Booking {
   id: string;
   name: string;
   title: string;
-  startTime: string;
-  endTime: string;
-  room: string;
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+  room: string;      // "ESR Room" or "VP Room"
   date: Date;
   purpose?: string;
 }
 
+const API_BASE = 'http://localhost:5001/api/bookings';
+
 const BookingTimeline = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date(2025, 8, 15)); // September 15, 2025
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedRoom, setSelectedRoom] = useState('ESR Room');
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [bookings, setBookings] = useState<Booking[]>([
-    {
-    id: '1',
-    name: 'Daksh Yadav',
-    title: 'Technology Coordinator',
-    startTime: '00:00',
-    endTime: '03:00',
-    room: 'ESR Room',
-    date: new Date(2025, 8, 15),
-    purpose: 'Weekly technology review meeting'
-  },
-  {
-    id: '2',
-    name: 'Devansh Soni',
-    title: 'Technology Coordinator',
-    startTime: '12:00',
-    endTime: '13:00',
-    room: 'ESR Room',
-    date: new Date(2025, 8, 15),
-    purpose: 'Technology planning session'
-  },
-  {
-    id: '3',
-    name: 'Rohit Bej',
-    title: 'Secretary Web',
-    startTime: '14:00',
-    endTime: '15:00',
-    room: 'ESR Room',
-    date: new Date(2025, 8, 15),
-    purpose: 'Web department discussion'
-  },
-  {
-    id: '4',
-    name: 'Piyush Dubey',
-    title: 'Secretary Web',
-    startTime: '15:00',
-    endTime: '17:00',
-    room: 'VP Room',
-    date: new Date(2025, 8, 15),
-  }
-  ]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+  // ✅ GET bookings
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const formattedDate = formatDate(selectedDate);
+      console.log('📅 Fetching bookings for date:', formattedDate, 'and room:', selectedRoom);
+
+      const res = await fetch(`${API_BASE}?date=${formattedDate}`);
+      console.log('📡 GET status:', res.status);
+
+      if (!res.ok) {
+        console.error('❌ GET failed');
+        return;
+      }
+
+      const data = await res.json();
+      console.log('📥 Raw bookings from backend:', data);
+
+      const transformed: Booking[] = data
+        .filter((b: any) => {
+          const roomName = b.room === 'esr' ? 'ESR Room' : 'VP Room';
+          return roomName === selectedRoom;
+        })
+        .map((b: any) => ({
+          id: b._id,
+          name: b.name,
+          title: b.title,
+          startTime: new Date(b.startTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          endTime: new Date(b.endTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          room: b.room === 'esr' ? 'ESR Room' : 'VP Room',
+          date: new Date(b.startTime),
+          purpose: b.description
+        }));
+
+      console.log('✅ Transformed bookings for timeline:', transformed);
+      setBookings(transformed);
+    } catch (err) {
+      console.error('💥 Error fetching bookings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ POST new booking
+  const handleBookingSubmit = async (bookingData: any) => {
+    try {
+      console.log('📤 Sending booking to backend:', bookingData);
+
+      const body = {
+        name: bookingData.name,
+        title: bookingData.title,
+        room: bookingData.room === 'ESR Room' ? 'esr' : 'vp',
+        date: formatDate(bookingData.date),
+        startTime: bookingData.startTime,
+        endTime: bookingData.endTime,
+        description: bookingData.purpose || '',
+      };
+
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      console.log('📡 POST status:', res.status);
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || 'Failed to create booking');
+        return;
+      }
+
+      const newBooking = await res.json();
+      console.log('✅ Booking created successfully:', newBooking);
+
+      // 🟢 Automatically switch to the date/room you just booked
+      setSelectedDate(new Date(bookingData.date));
+      setSelectedRoom(bookingData.room);
+
+      await fetchBookings();
+      setShowBookingForm(false);
+    } catch (err) {
+      console.error('💥 Error creating booking:', err);
+    }
+  };
+
+
+  useEffect(() => {
+    console.log('📌 Selected date changed:', selectedDate);
+    console.log('📌 Selected room changed:', selectedRoom);
+    fetchBookings();
+  }, [selectedDate, selectedRoom]);
 
   const handleRefresh = () => {
-    console.log('Refreshing timeline...');
-  };
-
-  const handleNewBooking = () => {
-    setShowBookingForm(true);
-  };
-
-  const handleBookingSubmit = (bookingData: any) => {
-    const newBooking: Booking = {
-      id: Date.now().toString(),
-      name: bookingData.name,
-      title: bookingData.title,
-      startTime: bookingData.startTime,
-      endTime: bookingData.endTime,
-      room: bookingData.room,
-      date: bookingData.date,
-      purpose: bookingData.purpose,
-    };
-    
-    setBookings(prev => [...prev, newBooking]);
+    console.log('🔁 Manual refresh clicked');
+    fetchBookings();
   };
 
   return (
@@ -103,12 +143,13 @@ const BookingTimeline = () => {
               variant="secondary" 
               onClick={handleRefresh}
               className="flex items-center gap-2"
+              disabled={loading}
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
             <Button 
-              onClick={handleNewBooking}
+              onClick={() => setShowBookingForm(true)}
               className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
@@ -119,7 +160,6 @@ const BookingTimeline = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Section 1: Date Picker */}
           <Card className="p-6">
             <div className="mb-4">
               <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-md font-medium">
@@ -132,7 +172,6 @@ const BookingTimeline = () => {
             />
           </Card>
 
-          {/* Section 2: Room Selector */}
           <Card className="p-6">
             <div className="mb-4">
               <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-md font-medium">
@@ -151,10 +190,7 @@ const BookingTimeline = () => {
           <TimelineView 
             selectedDate={selectedDate}
             selectedRoom={selectedRoom}
-            bookings={bookings.filter(booking => 
-              booking.room === selectedRoom && 
-              booking.date.toDateString() === selectedDate.toDateString()
-            )}
+            bookings={bookings}
           />
         </Card>
 
