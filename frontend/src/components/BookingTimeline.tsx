@@ -153,11 +153,6 @@ const BookingTimeline = () => {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="p-6">
-            <div className="mb-4">
-              <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-md font-medium">
-                Section 1
-              </span>
-            </div>
             <DatePicker 
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
@@ -165,11 +160,6 @@ const BookingTimeline = () => {
           </Card>
 
           <Card className="p-6">
-            <div className="mb-4">
-              <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-md font-medium">
-                Section 2
-              </span>
-            </div>
             <RoomSelector 
               selectedRoom={selectedRoom}
               onRoomSelect={setSelectedRoom}

@@ -17,16 +17,19 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSele
   };
 
   const getWeekDays = (date: Date) => {
-    const startOfWeek = new Date(date);
-    const diff = startOfWeek.getDate() - startOfWeek.getDay() + 1; // Start from Monday
-    startOfWeek.setDate(diff);
+  // Get Monday of the current week
+  const day = date.getDay(); // 0 (Sun) to 6 (Sat)
+  const mondayDiff = day === 0 ? -6 : 1 - day; 
+  const monday = new Date(date);
+  monday.setDate(date.getDate() + mondayDiff);
 
-    return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      return day;
-    });
-  };
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+};
+
 
   const weekDays = getWeekDays(selectedDate);
 
