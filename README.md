@@ -106,11 +106,6 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-#### Development with Docker
-```bash
-docker-compose -f docker-compose.dev.yml up -d
-```
-
 ## 📁 Project Structure
 
 ```
@@ -134,7 +129,6 @@ VP-ESR/
 │   └── Dockerfile            # Frontend container
 ├── nginx/                     # Reverse proxy configuration
 ├── docker-compose.yml         # Production Docker setup
-├── docker-compose.dev.yml     # Development Docker setup
 └── README.md                  # This file
 ```
 
