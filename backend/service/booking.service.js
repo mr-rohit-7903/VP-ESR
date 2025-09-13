@@ -75,3 +75,14 @@ export const delBooking = async(_id)=>{
   
   return del;
 }
+
+export const bookingByName = async(name)=>{
+  if(!name){
+    const error = new Error('No name found while fetching using name');
+    error.statusCode = 409;
+    throw error.message;
+  }
+  const bookings = await Booking.find({name:name});
+  return bookings;
+
+}

@@ -2,7 +2,8 @@ import asyncHandler from 'express-async-handler';
 import {
   createBookingService,
   getBookingsByDateService,
-  delBooking
+  delBooking,
+  bookingByName
 } from '../service/booking.service.js';
 
 
@@ -36,4 +37,14 @@ export const deleteBooking = asyncHandler(async(req,res)=>{
     throw new Error('No such booking found while deleting')
   }
   res.status(200).json(del);
+})
+
+export const getBookingsByName = asyncHandler(async(req,res)=>{
+  const {name} = req.query;
+  if(!name){
+    res.status(400);
+    throw new Error('Name is required for fetching')
+  }
+  const name_bookings = await bookingByName(name);
+  res.status(200).json(name_bookings);
 })
