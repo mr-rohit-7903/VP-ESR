@@ -16,15 +16,14 @@ const MyBookings: React.FC = () => {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // 🔹 Change this to the logged-in user's name
-  const userName = "John Doe";
+  const userName = "Piyush Dubey";
 
   const fetchMyBookings = async () => {
     setLoading(true);
     setError("");
     try {
       const res = await fetch(
-        `http://localhost:5001/api/bookings/my?name=${encodeURIComponent(userName)}`
+        `http://localhost:5001/api/bookings/myBookings?name=${encodeURIComponent(userName)}`
       );
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
