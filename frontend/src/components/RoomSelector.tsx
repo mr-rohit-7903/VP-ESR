@@ -9,7 +9,7 @@ const rooms = [
   {
     id: 'ESR Room',
     name: 'ESR Room',
-    description: 'Executive Student Room - conference and meeting room',
+    description: 'Elected Students Representative - conference and meeting room',
   },
   {
     id: 'VP Room',
