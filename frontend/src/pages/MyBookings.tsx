@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 
 interface Booking {
   _id: string;
-  title: string;        // Position / Title
+  title: string; // Position / Title
   room: string;
   startTime: string;
   endTime: string;
@@ -13,24 +13,27 @@ interface Booking {
 const MyBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const userName = "Roshil Singh";
+  const userName = 'Roshil Singh';
 
+  const API_PREFIX = process.env.VITE_APP_API_PREFIX || 'http://localhost:5001';
   const fetchMyBookings = async () => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const res = await fetch(
-        `http://localhost:5001/api/bookings/myBookings?name=${encodeURIComponent(userName)}`
+        `${API_PREFIX}/api/bookings/myBookings?name=${encodeURIComponent(
+          userName
+        )}`
       );
-      if (!res.ok) throw new Error("Failed to fetch bookings");
+      if (!res.ok) throw new Error('Failed to fetch bookings');
       const data = await res.json();
       // console.log("Fetched bookings:", data);
       setBookings(data);
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -38,43 +41,43 @@ const MyBookings: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     const confirm = await Swal.fire({
-      title: "Cancel Booking?",
-      text: "Are you sure you want to cancel this booking?",
-      icon: "warning",
+      title: 'Cancel Booking?',
+      text: 'Are you sure you want to cancel this booking?',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, cancel it",
-      background: "#1f2937",
-      color: "#f3f4f6",
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, cancel it',
+      background: '#1f2937',
+      color: '#f3f4f6',
     });
 
     if (!confirm.isConfirmed) return;
 
     setDeletingId(id);
     try {
-      const res = await fetch(`http://localhost:5001/api/bookings?_id=${id}`, {
-        method: "DELETE",
+      const res = await fetch(`${API_PREFIX}/api/bookings?_id=${id}`, {
+        method: 'DELETE',
       });
-      if (!res.ok) throw new Error("Failed to delete booking");
+      if (!res.ok) throw new Error('Failed to delete booking');
       setBookings((prev) => prev.filter((b) => b._id !== id));
 
       Swal.fire({
-        title: "Cancelled!",
-        text: "Your booking has been cancelled.",
-        icon: "success",
-        background: "#1f2937",
-        color: "#f3f4f6",
-        confirmButtonColor: "#3b82f6",
+        title: 'Cancelled!',
+        text: 'Your booking has been cancelled.',
+        icon: 'success',
+        background: '#1f2937',
+        color: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
       });
     } catch (err: any) {
       Swal.fire({
-        title: "Error",
-        text: err.message || "Delete failed",
-        icon: "error",
-        background: "#1f2937",
-        color: "#f3f4f6",
-        confirmButtonColor: "#3b82f6",
+        title: 'Error',
+        text: err.message || 'Delete failed',
+        icon: 'error',
+        background: '#1f2937',
+        color: '#f3f4f6',
+        confirmButtonColor: '#3b82f6',
       });
     } finally {
       setDeletingId(null);
@@ -111,16 +114,24 @@ const MyBookings: React.FC = () => {
 
             <div className="text-sm text-gray-300 space-y-1">
               <p>
-                <span className="font-medium text-gray-200">Room:</span> {booking.room}
+                <span className="font-medium text-gray-200">Room:</span>{' '}
+                {booking.room}
               </p>
               <p>
-                <span className="font-medium text-gray-200">Date:</span>{" "}
+                <span className="font-medium text-gray-200">Date:</span>{' '}
                 {new Date(booking.startTime).toLocaleDateString()}
               </p>
               <p>
-                <span className="font-medium text-gray-200">Time:</span>{" "}
-                {new Date(booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{" "}
-                {new Date(booking.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <span className="font-medium text-gray-200">Time:</span>{' '}
+                {new Date(booking.startTime).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                -{' '}
+                {new Date(booking.endTime).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </p>
             </div>
 
@@ -129,7 +140,7 @@ const MyBookings: React.FC = () => {
               onClick={() => handleDelete(booking._id)}
               disabled={deletingId === booking._id}
             >
-              {deletingId === booking._id ? "Cancelling..." : "Cancel Booking"}
+              {deletingId === booking._id ? 'Cancelling...' : 'Cancel Booking'}
             </button>
           </div>
         ))}

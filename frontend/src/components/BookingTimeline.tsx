@@ -13,13 +13,15 @@ export interface Booking {
   name: string;
   title: string;
   startTime: string; // HH:mm
-  endTime: string;   // HH:mm
-  room: string;      // "ESR Room" or "VP Room"
+  endTime: string; // HH:mm
+  room: string; // "ESR Room" or "VP Room"
   date: Date;
   purpose?: string;
 }
 
-const API_BASE = 'http://localhost:5001/api/bookings';
+const API_BASE = `${
+  import.meta.env.VITE_APP_API_PREFIX || 'http://localhost:5001'
+}/api/bookings`;
 
 const BookingTimeline = () => {
   const navigate = useNavigate();
@@ -59,11 +61,17 @@ const BookingTimeline = () => {
           id: b._id,
           name: b.name,
           title: b.title,
-          startTime: new Date(b.startTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-          endTime: new Date(b.endTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          startTime: new Date(b.startTime).toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          endTime: new Date(b.endTime).toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
           room: b.room === 'esr' ? 'ESR Room' : 'VP Room',
           date: new Date(b.startTime),
-          purpose: b.description
+          purpose: b.description,
         }));
 
       // console.log('✅ Transformed bookings for timeline:', transformed);
@@ -94,7 +102,7 @@ const BookingTimeline = () => {
       const res = await fetch(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       // console.log('📡 POST status:', res.status);
@@ -125,25 +133,27 @@ const BookingTimeline = () => {
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Room Booking Timeline</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Room Booking Timeline
+            </h1>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              Timeline for booking ESR and VP room • Book available slots instantly
+              Timeline for booking ESR and VP room • Book available slots
+              instantly
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Button 
+            <Button
               variant="secondary"
               onClick={() => navigate('/my-bookings')}
               className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               My Bookings
             </Button>
-            <Button 
+            <Button
               onClick={() => setShowBookingForm(true)}
               className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
             >
@@ -156,14 +166,14 @@ const BookingTimeline = () => {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="p-4 sm:p-6">
-            <DatePicker 
+            <DatePicker
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
             />
           </Card>
 
           <Card className="p-4 sm:p-6">
-            <RoomSelector 
+            <RoomSelector
               selectedRoom={selectedRoom}
               onRoomSelect={setSelectedRoom}
             />
@@ -172,7 +182,7 @@ const BookingTimeline = () => {
 
         {/* Timeline View */}
         <Card className="p-4 sm:p-6 overflow-x-auto">
-          <TimelineView 
+          <TimelineView
             selectedDate={selectedDate}
             selectedRoom={selectedRoom}
             bookings={bookings}
@@ -180,7 +190,7 @@ const BookingTimeline = () => {
         </Card>
 
         {/* Booking Form Dialog */}
-        <BookingForm 
+        <BookingForm
           open={showBookingForm}
           onOpenChange={setShowBookingForm}
           onSubmit={handleBookingSubmit}
