@@ -40,22 +40,27 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-const bookingSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  title: z.string().min(2, 'Title must be at least 2 characters'),
-  room: z.string().min(1, 'Please select a room'),
-  date: z.date({ required_error: 'Please select a date' }),
-  startTime: z.string().min(1, 'Please select start time'),
-  endTime: z.string().min(1, 'Please select end time'),
-  purpose: z.string().optional(),
-}).refine((data) => {
-  const start = parseInt(data.startTime.split(':')[0]);
-  const end = parseInt(data.endTime.split(':')[0]);
-  return end > start;
-}, {
-  message: "End time must be after start time",
-  path: ["endTime"],
-});
+const bookingSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    title: z.string().min(2, 'Title must be at least 2 characters'),
+    room: z.string().min(1, 'Please select a room'),
+    date: z.date({ required_error: 'Please select a date' }),
+    startTime: z.string().min(1, 'Please select start time'),
+    endTime: z.string().min(1, 'Please select end time'),
+    purpose: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const start = parseInt(data.startTime.split(':')[0]);
+      const end = parseInt(data.endTime.split(':')[0]);
+      return end > start;
+    },
+    {
+      message: 'End time must be after start time',
+      path: ['endTime'],
+    }
+  );
 
 type BookingFormData = z.infer<typeof bookingSchema>;
 
@@ -66,7 +71,10 @@ interface BookingFormProps {
 }
 
 const rooms = [
-  { value: 'ESR Room', label: 'ESR Room - Executive Student Room' },
+  {
+    value: 'ESR Room',
+    label: "ESR Room - Elected Student's Representative Room",
+  },
   { value: 'VP Room', label: 'VP Room - Vice President Room' },
 ];
 
@@ -101,8 +109,11 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     onSubmit(data);
 
     toast({
-      title: "Booking Created",
-      description: `Room ${data.room} booked for ${format(data.date, 'PPP')} from ${data.startTime} to ${data.endTime}`,
+      title: 'Booking Created',
+      description: `Room ${data.room} booked for ${format(
+        data.date,
+        'PPP'
+      )} from ${data.startTime} to ${data.endTime}`,
     });
 
     form.reset();
@@ -116,12 +127,13 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         <DialogHeader>
           <DialogTitle>New Room Booking</DialogTitle>
           <DialogDescription>
-            Fill in the details below to book a room. All fields marked with * are required.
+            Fill in the details below to book a room. All fields marked with *
+            are required.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form 
+          <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6 pb-2"
           >
@@ -134,7 +146,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   <FormItem>
                     <FormLabel>Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field}/>
+                      <Input placeholder="Enter your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,7 +159,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   <FormItem>
                     <FormLabel>Title/Position *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Technology Coordinator" {...field}/>
+                      <Input
+                        placeholder="e.g., Technology Coordinator"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -162,7 +177,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Room *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a room" />
@@ -195,11 +213,15 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                           type="button"
                           variant="outline"
                           className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground'
                           )}
                         >
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          {field.value ? (
+                            format(field.value, 'PPP')
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -231,7 +253,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Start Time *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <Clock className="w-4 h-4 mr-2" />
@@ -256,7 +281,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>End Time *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <Clock className="w-4 h-4 mr-2" />
@@ -285,7 +313,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                 <FormItem>
                   <FormLabel>Purpose (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Brief description of the meeting purpose"
                       className="resize-none min-h-[80px]"
                       {...field}
@@ -297,7 +325,11 @@ export const BookingForm: React.FC<BookingFormProps> = ({
             />
 
             <DialogFooter className="flex gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">Create Booking</Button>
