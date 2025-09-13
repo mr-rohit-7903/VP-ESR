@@ -81,6 +81,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   onSubmit,
 }) => {
   const { toast } = useToast();
+  const [calendarOpen, setCalendarOpen] = React.useState(false);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -95,12 +96,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   });
 
   const handleSubmit = (data: BookingFormData) => {
-    console.log('📝 BookingForm submitting data:', data);
-
-    if (!data.date) {
-      console.error('❌ No date selected');
-      return;
-    }
+    if (!data.date) return;
 
     onSubmit(data);
 
@@ -109,15 +105,14 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       description: `Room ${data.room} booked for ${format(data.date, 'PPP')} from ${data.startTime} to ${data.endTime}`,
     });
 
-    console.log('✅ BookingForm submitted and toast shown');
-
     form.reset();
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      {/* ✅ Removed overflow-y-auto, added responsive width */}
+      <DialogContent className="sm:max-w-[600px] w-[95vw] p-6">
         <DialogHeader>
           <DialogTitle>New Room Booking</DialogTitle>
           <DialogDescription>
@@ -127,14 +122,11 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
         <Form {...form}>
           <form 
-            onSubmit={form.handleSubmit(
-              handleSubmit,
-              (errors) => console.error('⚠️ Validation errors:', errors)
-            )}
-            className="space-y-6"
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6 pb-2"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Name */}
+            {/* Name + Title */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -142,17 +134,12 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   <FormItem>
                     <FormLabel>Name *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} onChange={(e) => {
-                        console.log('✏️ Name changed:', e.target.value);
-                        field.onChange(e);
-                      }}/>
+                      <Input placeholder="Enter your full name" {...field}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Title */}
               <FormField
                 control={form.control}
                 name="title"
@@ -175,10 +162,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Room *</FormLabel>
-                  <Select onValueChange={(v) => {
-                    console.log('🏢 Room selected:', v);
-                    field.onChange(v);
-                  }} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a room" />
@@ -202,12 +186,13 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Date *</FormLabel>
-                  <Popover>
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
+                          type="button"
                           variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
@@ -224,8 +209,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                         mode="single"
                         selected={field.value}
                         onSelect={(d) => {
-                          console.log('📅 Date picked:', d);
                           field.onChange(d);
+                          setCalendarOpen(false);
                         }}
                         disabled={(date) => date < new Date()}
                         initialFocus
@@ -238,18 +223,15 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Start Time */}
+            {/* Start + End Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="startTime"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Start Time *</FormLabel>
-                    <Select onValueChange={(v) => {
-                      console.log('⏰ Start time selected:', v);
-                      field.onChange(v);
-                    }} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <Clock className="w-4 h-4 mr-2" />
@@ -268,18 +250,13 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   </FormItem>
                 )}
               />
-
-              {/* End Time */}
               <FormField
                 control={form.control}
                 name="endTime"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>End Time *</FormLabel>
-                    <Select onValueChange={(v) => {
-                      console.log('⏳ End time selected:', v);
-                      field.onChange(v);
-                    }} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <Clock className="w-4 h-4 mr-2" />
@@ -310,12 +287,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
                   <FormControl>
                     <Textarea 
                       placeholder="Brief description of the meeting purpose"
-                      className="resize-none"
+                      className="resize-none min-h-[80px]"
                       {...field}
-                      onChange={(e) => {
-                        console.log('📝 Purpose changed:', e.target.value);
-                        field.onChange(e);
-                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -323,11 +296,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
               )}
             />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => {
-                console.log('🚪 Cancel clicked');
-                onOpenChange(false);
-              }}>
+            <DialogFooter className="flex gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit">Create Booking</Button>

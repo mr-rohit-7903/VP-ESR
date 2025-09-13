@@ -37,18 +37,18 @@ const BookingTimeline = () => {
     try {
       setLoading(true);
       const formattedDate = formatDate(selectedDate);
-      console.log('📅 Fetching bookings for date:', formattedDate, 'and room:', selectedRoom);
+      // console.log('📅 Fetching bookings for date:', formattedDate, 'and room:', selectedRoom);
 
       const res = await fetch(`${API_BASE}?date=${formattedDate}`);
-      console.log('📡 GET status:', res.status);
+      // console.log('📡 GET status:', res.status);
 
       if (!res.ok) {
-        console.error('❌ GET failed');
+        // console.error('❌ GET failed');
         return;
       }
 
       const data = await res.json();
-      console.log('📥 Raw bookings from backend:', data);
+      // console.log('📥 Raw bookings from backend:', data);
 
       const transformed: Booking[] = data
         .filter((b: any) => {
@@ -66,10 +66,10 @@ const BookingTimeline = () => {
           purpose: b.description
         }));
 
-      console.log('✅ Transformed bookings for timeline:', transformed);
+      // console.log('✅ Transformed bookings for timeline:', transformed);
       setBookings(transformed);
     } catch (err) {
-      console.error('💥 Error fetching bookings:', err);
+      // console.error('💥 Error fetching bookings:', err);
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ const BookingTimeline = () => {
   // ✅ POST new booking
   const handleBookingSubmit = async (bookingData: any) => {
     try {
-      console.log('📤 Sending booking to backend:', bookingData);
+      // console.log('📤 Sending booking to backend:', bookingData);
 
       const body = {
         name: bookingData.name,
@@ -89,6 +89,7 @@ const BookingTimeline = () => {
         endTime: bookingData.endTime,
         description: bookingData.purpose || '',
       };
+      // console.log(body);
 
       const res = await fetch(API_BASE, {
         method: 'POST',
@@ -96,7 +97,7 @@ const BookingTimeline = () => {
         body: JSON.stringify(body)
       });
 
-      console.log('📡 POST status:', res.status);
+      // console.log('📡 POST status:', res.status);
 
       if (!res.ok) {
         const err = await res.json();
@@ -105,7 +106,7 @@ const BookingTimeline = () => {
       }
 
       const newBooking = await res.json();
-      console.log('✅ Booking created successfully:', newBooking);
+      // console.log('✅ Booking created successfully:', newBooking);
 
       setSelectedDate(new Date(bookingData.date));
       setSelectedRoom(bookingData.room);
@@ -113,7 +114,7 @@ const BookingTimeline = () => {
       await fetchBookings();
       setShowBookingForm(false);
     } catch (err) {
-      console.error('💥 Error creating booking:', err);
+      // console.error('💥 Error creating booking:', err);
     }
   };
 
@@ -122,27 +123,29 @@ const BookingTimeline = () => {
   }, [selectedDate, selectedRoom]);
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Room Booking Timeline</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Room Booking Timeline</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               Timeline for booking ESR and VP room • Book available slots instantly
             </p>
           </div>
-          <div className="flex gap-3">
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Button 
               variant="secondary"
               onClick={() => navigate('/my-bookings')}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               My Bookings
             </Button>
             <Button 
               onClick={() => setShowBookingForm(true)}
-              className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               New Booking
@@ -152,14 +155,14 @@ const BookingTimeline = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <DatePicker 
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
             />
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <RoomSelector 
               selectedRoom={selectedRoom}
               onRoomSelect={setSelectedRoom}
@@ -168,7 +171,7 @@ const BookingTimeline = () => {
         </div>
 
         {/* Timeline View */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6 overflow-x-auto">
           <TimelineView 
             selectedDate={selectedDate}
             selectedRoom={selectedRoom}
